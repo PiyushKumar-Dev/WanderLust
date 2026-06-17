@@ -1,0 +1,36 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: wanderlust-app:latest
+    container_name: wanderlust-web
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=development
+      - PORT=8080
+      - MONGO_URL=mongodb://mongo:27017/wanderlust
+      - SESSION_SECRET=compose_local_secret_123456789
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: always
+
+  mongo:
+    image: mongo:6.0
+    container_name: wanderlust-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    restart: always
+
+volumes:
+  mongo_data:
