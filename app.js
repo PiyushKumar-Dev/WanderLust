@@ -83,6 +83,14 @@ main()
 app.get("/",(req,res)=>{
     res.redirect("/listings");
 })
+
+app.get("/seed-database", wrapAsync(async (req, res, next) => {
+    const initData = require("./init/data.js");
+    const Listing = require("./models/listing.js");
+    await Listing.deleteMany({});
+    await Listing.insertMany(initData.data);
+    res.send("Database seeded successfully with listings!");
+}))
 app.use((req,res,next)=>{
     res.locals.success=req.flash("success");
     res.locals.error=req.flash("error");
