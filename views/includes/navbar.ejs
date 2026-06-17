@@ -11,11 +11,11 @@
         <a class="nav-link" href="/listings/new">Add new</a>
       </div>
        <div class="navbar-nav ms-auto">
-        <% if(!currentUser){ %>
+        <% if(!locals.currentUser){ %>
             <a class="nav-link" href="/signup">Signup</a>
         <a class="nav-link" href="/login">Login</a>
       <% }%> 
-      <% if(currentUser) { %>
+      <% if(locals.currentUser) { %>
         <a class="nav-link" href="/logout">Logout</a>
        <%} %>
       </div>
