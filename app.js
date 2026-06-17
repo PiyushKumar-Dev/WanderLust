@@ -81,7 +81,7 @@ main()
 });
 
 app.get("/",(req,res)=>{
-    res.send("everything is working");
+    res.redirect("/listings");
 })
 app.use((req,res,next)=>{
     res.locals.success=req.flash("success");
