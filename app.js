@@ -50,8 +50,10 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());   
 
-async function main(){
-    await mongoose.connect(mongoUrl);
+async function main() {
+    await mongoose.connect(mongoUrl, {
+        serverSelectionTimeoutMS: 5000,
+    });
 }
 const wrapAsync=require("./utils/wrapAsyn.js");
 const ExpressError=require("./utils/ExpressErrors.js");
@@ -59,13 +61,13 @@ const handleValidationErr = err => {
     return new ExpressError(400, err.message);
 };
 main()
-.then(()=>{
-    console.log("connected to db");
-})
-.catch((err)=>{
-    console.log(err);
-});
-
+    .then(() => {
+        console.log("✅ Connected to MongoDB");
+    })
+    .catch((err) => {
+        console.error("❌ MongoDB Connection Error:");
+        console.error(err);
+    });
 app.get("/",(req,res)=>{
     res.send("everything is working");
 })
