@@ -13,6 +13,12 @@ app.use(methodoverride("_method"));
 const engine=require('ejs-mate');
 app.engine('ejs',engine);
 const mongoUrl=process.env.MONGO_URI;
+
+
+console.log("Mongo URI exists:", !!process.env.MONGO_URI);
+console.log("Mongo URI starts with:", process.env.MONGO_URI?.substring(0, 25));
+
+
 app.use(express.static(path.join(__dirname,"/public"))); 
 const reviewsRouter=require("./routes/review.js");
 const listingRouter= require("./routes/listing.js");
