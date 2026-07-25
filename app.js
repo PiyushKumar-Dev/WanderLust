@@ -3,6 +3,7 @@ if (process.env.NODE_ENV !== "production") {
 }
 const express=require("express");
 const app=express();
+app.set("trust proxy", 1);
 const mongoose=require("mongoose");
 const path=require("path");
 app.set("view engine","ejs");
@@ -12,7 +13,11 @@ const methodoverride=require("method-override");
 app.use(methodoverride("_method"));
 const engine=require('ejs-mate');
 app.engine('ejs',engine);
-const mongoUrl=process.env.MONGO_URI;
+const mongoUrl = process.env.MONGO_URI;
+
+if (!mongoUrl) {
+    throw new Error("MONGO_URI is not defined");
+}
 
 const PORT = process.env.PORT || 8080;
 
@@ -37,7 +42,9 @@ const sessionOptions={
        expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
         maxAge:1000*60*60*24*7,
         httpOnly:true,
-        secure: process.env.NODE_ENV === "production"
+        secure: process.env.NODE_ENV === "production",
+         sameSite: "lax"
+
     }
 };
 
@@ -50,9 +57,6 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());   
 
-if (!process.env.MONGO_URI) {
-    throw new Error("MONGO_URI is not defined");
-}
 
 async function main() {
     await mongoose.connect(mongoUrl);
