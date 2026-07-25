@@ -14,9 +14,8 @@ const engine=require('ejs-mate');
 app.engine('ejs',engine);
 const mongoUrl=process.env.MONGO_URI;
 
+const PORT = process.env.PORT || 8080;
 
-console.log("Mongo URI exists:", !!process.env.MONGO_URI);
-console.log("Mongo URI starts with:", process.env.MONGO_URI?.substring(0, 25));
 
 
 app.use(express.static(path.join(__dirname,"/public"))); 
@@ -33,11 +32,12 @@ const User=require("./models/user.js");
 const sessionOptions={
     secret:process.env.SESSION_SECRET,
     resave:false,
-    saveUninitialized:true,
+    saveUninitialized:false,
     cookie:{
-        expires:Date.now()+1000*60*60*24*7,
+       expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
         maxAge:1000*60*60*24*7,
         httpOnly:true,
+        secure: process.env.NODE_ENV === "production"
     }
 };
 
@@ -50,10 +50,12 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());   
 
+if (!process.env.MONGO_URI) {
+    throw new Error("MONGO_URI is not defined");
+}
+
 async function main() {
-    await mongoose.connect(mongoUrl, {
-        serverSelectionTimeoutMS: 5000,
-    });
+    await mongoose.connect(mongoUrl);
 }
 const wrapAsync=require("./utils/wrapAsyn.js");
 const ExpressError=require("./utils/ExpressErrors.js");
@@ -63,6 +65,10 @@ const handleValidationErr = err => {
 main()
     .then(() => {
         console.log("✅ Connected to MongoDB");
+        
+      app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
     })
     .catch((err) => {
         console.error("❌ MongoDB Connection Error:");
@@ -102,10 +108,6 @@ app.use((err, req, res, next) => {
     let { statusCode = 500, message = "something went wrong" } = err;
     res.status(statusCode).render("listings/error.ejs", { err });
 });
-if (process.env.NODE_ENV !== "production") {
-    app.listen(8080, () => {
-        console.log("listing port 8080");
-    });
-}
 
-module.exports = app;
+
+
